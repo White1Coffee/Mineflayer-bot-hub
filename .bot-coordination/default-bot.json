@@ -1,0 +1,22 @@
+{
+  "username": "default-bot",
+  "dimension": "overworld",
+  "position": {
+    "x": 217,
+    "y": 61,
+    "z": 223
+  },
+  "mode": "farm",
+  "task": {
+    "action": "farming",
+    "detail": "producing food and renewable resources",
+    "target": "food 0/32 | harvests 0 | breeds 0",
+    "position": null,
+    "mode": "farm",
+    "id": 3,
+    "source": "autonomy",
+    "updatedAt": "2026-09-10T18:15:38+02:00"
+  },
+  "reservation": null,
+  "updatedAt": 1789056939761
+}
