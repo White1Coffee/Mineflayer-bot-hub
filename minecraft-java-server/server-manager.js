@@ -1,4 +1,4 @@
-const fs = require('fs')
+﻿const fs = require('fs')
 const http = require('http')
 const net = require('net')
 const os = require('os')
@@ -12,6 +12,7 @@ const nbt = require(path.join(ROOT_DIR, 'Bots', 'node_modules', 'prismarine-nbt'
 const PORT = Number(process.env.SERVER_MANAGER_PORT || 3101)
 const HOST = process.env.SERVER_MANAGER_HOST || '0.0.0.0'
 const LOCAL_HOST = '127.0.0.1'
+const SERVER_JAVA_EXE = process.env.SERVER_JAVA_EXE || path.join(process.env.LOCALAPPDATA || '', 'Programs', 'Eclipse Adoptium', 'jdk-25.0.4.1+1', 'bin', 'java.exe')
 const LOG_DIR = path.join(ROOT_DIR, 'Logs', 'minecraft-server')
 const OUT_LOG = path.join(LOG_DIR, 'server.out.log')
 const ERR_LOG = path.join(LOG_DIR, 'server.err.log')
@@ -474,7 +475,7 @@ async function startServer() {
   fs.mkdirSync(LOG_DIR, { recursive: true })
   const outStream = fs.createWriteStream(OUT_LOG, { flags: 'a' })
   const errStream = fs.createWriteStream(ERR_LOG, { flags: 'a' })
-  const child = spawn('java', ['-Xms4G', '-Xmx6G', '-jar', 'server.jar'], {
+  const child = spawn(SERVER_JAVA_EXE, ['-Xms4G', '-Xmx10G', '-jar', 'server.jar'], {
     cwd: SERVER_DIR,
     windowsHide: true,
     stdio: ['pipe', 'pipe', 'pipe']
@@ -544,6 +545,7 @@ function html() {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="/favicon.png">
   <title>Minecraft Server Manager</title>
   <style>
     :root{color-scheme:dark;--bg:#070b12;--panel:#101923;--line:#294055;--text:#f4f8ff;--muted:#9fb0c2;--green:#55d6a5;--blue:#2f7db8;--red:#e26b7f;--yellow:#f1c75b;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,sans-serif}
@@ -586,7 +588,7 @@ async function api(url, options={}){const r=await fetch(url,{headers:{'Content-T
 function bytes(v){let n=Number(v||0),u=['B','KB','MB','GB'],i=0;while(n>1024&&i<u.length-1){n/=1024;i++}return n.toFixed(i?1:0)+' '+u[i]}
 function head(name){return 'https://mc-heads.net/avatar/'+encodeURIComponent(name||'Steve')+'/48'}
 function propInput(key,value){const bool=['true','false'].includes(String(value));return '<label>'+esc(key)+(bool?'<select data-prop="'+esc(key)+'"><option value="true" '+(value==='true'?'selected':'')+'>true</option><option value="false" '+(value==='false'?'selected':'')+'>false</option></select>':'<input data-prop="'+esc(key)+'" value="'+esc(value)+'">')+'</label>'}
-function renderPlayerList(){document.getElementById('playerList').innerHTML=(data.players||[]).map(p=>'<button type="button" class="player-card '+(selectedPlayer===p.uuid?'active':'')+'" data-player="'+esc(p.uuid)+'"><img src="'+head(p.name)+'" alt=""><span><span class="player-name">'+esc(p.name)+'</span><span class="status-dot '+(p.online?'online':'')+'"></span><br><small>'+esc(p.online?'Online':'Offline')+'</small></span><span class="arrow">›</span></button>').join('')||'<p style="color:var(--muted)">No players found.</p>'}
+function renderPlayerList(){document.getElementById('playerList').innerHTML=(data.players||[]).map(p=>'<button type="button" class="player-card '+(selectedPlayer===p.uuid?'active':'')+'" data-player="'+esc(p.uuid)+'"><img src="'+head(p.name)+'" alt=""><span><span class="player-name">'+esc(p.name)+'</span><span class="status-dot '+(p.online?'online':'')+'"></span><br><small>'+esc(p.online?'Online':'Offline')+'</small></span><span class="arrow">â€º</span></button>').join('')||'<p style="color:var(--muted)">No players found.</p>'}
 function renderInventory(items,equipment={}){const bySlot=new Map((items||[]).map(item=>[Number(item.slot),item]));let html='';for(let slot=0;slot<36;slot++){html+=renderSlot(slot,bySlot.get(slot))}for(const item of (items||[]).filter(item=>Number(item.slot)<0||Number(item.slot)>35)){html+=renderSlot(Number(item.slot),item)}return '<div class="equipment-row">'+equipmentSlot('Helmet',equipment.helmet,'/textures/items/iron_helmet.png')+equipmentSlot('Chestplate',equipment.chestplate,'/textures/items/iron_chestplate.png')+equipmentSlot('Leggings',equipment.leggings,'/textures/items/iron_leggings.png')+equipmentSlot('Boots',equipment.boots,'/textures/items/iron_boots.png')+equipmentSlot('Shield place',equipment.offhand,'/textures/gui/sprites/container/slot/shield.png')+'</div><div class="mc-inventory">'+html+'</div>'}
 function equipmentSlot(label,item,emptyIcon){return '<div class="equipment-slot"><span>'+esc(label)+'</span>'+renderSlot(label,item,emptyIcon)+'</div>'}
 function renderSlot(slot,item,emptyIcon=''){if(!item)return '<div class="slot" title="Empty slot '+esc(slot)+'">'+(emptyIcon?'<img class="empty-icon" src="'+esc(emptyIcon)+'" alt="">':'')+'</div>';const icon='<img src="'+esc(item.icon||'/textures/items/barrier.png')+'" alt="">';return '<div class="slot" title="'+esc(item.id)+' | slot '+esc(item.slot??slot)+'">'+icon+'<span class="count">'+esc(item.count>1?item.count:'')+'</span><button type="button" class="del" data-delete-item-slot="'+esc(item.slot??slot)+'">x</button></div>'}
@@ -618,7 +620,11 @@ async function route(request, response) {
   const url = new URL(request.url, `http://${request.headers.host || 'localhost'}`)
   try {
     if (request.method === 'GET' && url.pathname === '/') return text(response, 200, html(), 'text/html; charset=utf-8')
-    if (request.method === 'GET' && url.pathname.startsWith('/textures/')) {
+    if (request.method === 'GET' && url.pathname === '/favicon.png') {
+      response.writeHead(200, { 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=86400' })
+      fs.createReadStream(path.join(SERVER_DIR, 'server-icon.png')).pipe(response)
+      return
+    }    if (request.method === 'GET' && url.pathname.startsWith('/textures/')) {
       const rel = decodeURIComponent(url.pathname.slice('/textures/'.length)).replace(/\//g, path.sep)
       const file = path.resolve(TEXTURE_ROOT, rel)
       const root = path.resolve(TEXTURE_ROOT)
@@ -728,3 +734,4 @@ async function route(request, response) {
 http.createServer(route).listen(PORT, HOST, () => {
   console.log(`Minecraft Server Manager open: http://localhost:${PORT}`)
 })
+

@@ -100,3 +100,7 @@ minecraft-java-server/whitelist.json
 minecraft-java-server/banned-players.json
 minecraft-java-server/banned-ips.json
 minecraft-java-server/usercache.json
+/Afbeeldingen + PHONE
+.bot-coordination/default-bot.json
+/.bot-coordination
+**/AUDIT.md

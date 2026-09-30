@@ -1,5 +1,5 @@
 #Minecraft server properties
-#Tue Sep 29 14:39:08 CEST 2026
+#Tue Sep 29 11:29:14 CEST 2026
 accepts-transfers=false
 allow-flight=true
 allow-nether=true
@@ -36,7 +36,7 @@ motd=§6§lProject Overworld §8| §bExperiment Running...§r\n§fWhiteCoffee's 
 network-compression-threshold=256
 online-mode=false
 op-permission-level=4
-pause-when-empty-seconds=0
+pause-when-empty-seconds=60
 player-idle-timeout=0
 prevent-proxy-connections=false
 pvp=true

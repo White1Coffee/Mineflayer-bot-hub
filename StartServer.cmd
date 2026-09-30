@@ -62,5 +62,6 @@ echo Server is starting in the background.
 echo Server manager: http://localhost:3101
 echo Console logs: %OUT_LOG%
 echo Error logs:   %ERR_LOG%
-powershell.exe -NoProfile -WindowStyle Hidden -Command "Start-Process 'http://localhost:3101'" >nul 2>nul
+start "" "http://127.0.0.1:3101/"
 endlocal
+
