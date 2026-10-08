@@ -89,6 +89,11 @@ Data/schematics/**
 **/ai-recipes.json.*
 *.pid
 
+# Minecraft world and generated server diagnostics stay local; clones start with a fresh world.
+minecraft-java-server/world*/
+minecraft-java-server/crash-reports/
+minecraft-java-server/debug/
+
 # Minecraft server local/player state
 minecraft-java-server/logs/
 minecraft-java-server/world/session.lock
@@ -104,3 +109,10 @@ minecraft-java-server/usercache.json
 .bot-coordination/default-bot.json
 /.bot-coordination
 **/AUDIT.md
+
+# Standalone local HTML demos
+/test/
+/test-*.html
+
+# Windows volume metadata
+/System Volume Information/
