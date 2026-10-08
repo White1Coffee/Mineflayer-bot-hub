@@ -623,6 +623,23 @@
       if (button.dataset.tab === 'discordHealth' && !discord) refreshDiscord()
     }
 
+    const hubThemeSelect = document.getElementById('siteTheme')
+    function applyHubTheme(mode) {
+      const theme = mode === 'light' ? 'light' : 'dark'
+      document.documentElement.setAttribute('data-theme', theme)
+      if (hubThemeSelect) hubThemeSelect.value = theme
+      try { localStorage.setItem('bot-hub-theme', theme) } catch {}
+      const themeColor = document.querySelector('meta[name="theme-color"]')
+      if (themeColor) themeColor.content = theme === 'dark' ? '#070b12' : '#edf1e8'
+    }
+    let savedHubTheme = 'dark'
+    try {
+      const storedTheme = localStorage.getItem('bot-hub-theme')
+      if (storedTheme === 'light' || storedTheme === 'dark') savedHubTheme = storedTheme
+    } catch {}
+    applyHubTheme(savedHubTheme)
+    hubThemeSelect?.addEventListener('change', () => applyHubTheme(hubThemeSelect.value))
+
     document.querySelector('nav').addEventListener('click', event => {
       const button = event.target.closest('button[data-tab]')
       if (!button) return

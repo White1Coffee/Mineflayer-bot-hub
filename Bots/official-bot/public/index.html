@@ -145,6 +145,14 @@
       .settings-columns { grid-template-columns:1fr; }
       .skin-settings { grid-template-columns:1fr; }
     }
+
+    .project-sites{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 16px}
+    .project-site{display:flex;align-items:center;gap:10px;min-width:0;padding:9px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);text-decoration:none;box-shadow:0 8px 20px rgba(0,0,0,.15)}
+    .project-site:hover{border-color:var(--accent);transform:translateY(-1px)}
+    .project-site-mark{display:grid;place-items:center;flex:0 0 34px;height:34px;border-radius:9px;background:#1e66a0;color:#fff;font-size:.72rem;font-weight:950}
+    .project-site-copy{display:grid;min-width:0;gap:3px}.project-site-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.84rem}.project-site-copy small{color:var(--muted);font-size:.7rem}
+    .project-site-state{margin-left:auto;flex:0 0 auto;color:var(--muted);font-size:.7rem;font-weight:900}.project-site[data-state="online"] .project-site-state{color:var(--good)}.project-site[data-state="offline"] .project-site-state{color:var(--warn)}
+    @media(max-width:760px){.project-sites{grid-template-columns:1fr;gap:7px}}
   </style>
 </head>
 <body>
@@ -174,6 +182,11 @@
         <div id="connectedBadge" class="status"><i class="dot"></i><span id="connected">OFFLINE</span></div>
       </div>
 
+      <nav class="project-sites" aria-label="Project sites">
+        <a class="project-site" data-state="checking" data-project-site="hub" href="#" target="_blank" rel="noopener"><span class="project-site-mark">Hub</span><span class="project-site-copy"><strong>Bot Hub</strong><small>Multi-bot control</small></span><span class="project-site-state">Checking</span></a>
+        <a class="project-site" data-state="checking" data-project-site="server" href="#" target="_blank" rel="noopener"><span class="project-site-mark">MC</span><span class="project-site-copy"><strong>Minecraft Server</strong><small>Server manager</small></span><span class="project-site-state">Checking</span></a>
+        <a class="project-site" data-state="checking" data-project-site="last-bot" href="#" target="_blank" rel="noopener"><span class="project-site-mark">AI</span><span class="project-site-copy"><strong>Last bot</strong><small>Last bot dashboard visited</small></span><span class="project-site-state">Checking</span></a>
+      </nav>
       <form id="commandForm" class="command">
         <input id="command" placeholder="Type chat or an AI command, for example ai status" autocomplete="off">
         <button type="submit">Send</button>
@@ -891,6 +904,16 @@
     socket.on('runtime-data:result', result => {
       setHtml('backupStatus', esc(result?.message || 'Runtime data action finished.'))
     })
+    ;(function linkProjectSites(){
+      const host=window.location.hostname||'localhost',protocol=window.location.protocol,base=protocol+'//'+host
+      const botPages={'3110':'bot1','3112':'WC_Tester','3114':'bot2','3116':'official-bot','3118':'default-bot'}
+      const urls={hub:base+':3100/',server:base+':3101/'}
+      function lastPort(){const match=document.cookie.match(/(?:^|;\s*)yunalinkLastBot=(\d+)/);return match&&botPages[match[1]]?match[1]:'3118'}
+      if(botPages[window.location.port])document.cookie='yunalinkLastBot='+window.location.port+'; Path=/; Max-Age=2592000; SameSite=Lax'+(protocol==='https:'?'; Secure':'')
+      async function check(link,url){const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),2500);link.href=url;try{await fetch(url,{mode:'no-cors',cache:'no-store',signal:controller.signal});link.dataset.state='online';link.querySelector('.project-site-state').textContent='Online'}catch{link.dataset.state='offline';link.querySelector('.project-site-state').textContent='Offline'}finally{clearTimeout(timeout)}}
+      function refresh(){check(document.querySelector('[data-project-site="hub"]'),urls.hub);check(document.querySelector('[data-project-site="server"]'),urls.server);const port=lastPort(),last=document.querySelector('[data-project-site="last-bot"]');last.querySelector('.project-site-copy strong').textContent=botPages[port];check(last,base+':'+port+'/')}
+      refresh();setInterval(refresh,10000)
+    })()
   </script>
 </body>
 </html>

@@ -1246,7 +1246,7 @@ async function startBot(bot) {
       MC_VERSION: bot.version,
       MC_USERNAME: bot.username || bot.name,
       ...(bot.auth ? { MC_AUTH: bot.auth } : {}),
-      VIEWER_AUTOSTART: bot.viewerEnabled === false ? '0' : '1',
+      VIEWER_AUTOSTART: bot.viewerEnabled === true ? '1' : '0',
       MINECRAFT_AI_WORKER: '1'
       ,BOT_ID: bot.id
       ,BOT_TYPE: path.basename(folder)
@@ -1392,6 +1392,26 @@ app.use(express.static(path.join(__dirname, 'public')))
 
 app.get('/api/state', async (_request, response, next) => {
   try { response.json(await statePayload()) } catch (err) { next(err) }
+})
+
+app.get('/api/project/site-status/:port', (request, response) => {
+  const port = Number(request.params.port)
+  const allowedPorts = new Set([3101, ...(settings.bots || []).map(bot => Number(bot.hudPort))])
+  response.setHeader('Cache-Control', 'no-store')
+  if (!Number.isInteger(port) || !allowedPorts.has(port)) return response.status(400).json({ ok:false, online:false })
+
+  let finished = false
+  const finish = online => {
+    if (finished) return
+    finished = true
+    response.json({ ok:true, online })
+  }
+  const probe = http.get({ hostname:LOCAL_HOST, port, path:'/', timeout:2200 }, result => {
+    result.resume()
+    finish(result.statusCode >= 200 && result.statusCode < 500)
+  })
+  probe.setTimeout(2200, () => probe.destroy(new Error('Site check timed out.')))
+  probe.on('error', () => finish(false))
 })
 
 app.get('/api/dashboard/overview',(_request,response,next)=>{try{response.json({ok:true,overview:dashboardService.overview()})}catch(error){next(error)}})

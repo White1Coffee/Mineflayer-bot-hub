@@ -13,6 +13,7 @@ const { Server } = require('socket.io')
 const fs = require('fs')
 const path = require('path')
 const { spawn } = require('child_process')
+const { monitorEventLoopDelay } = require('perf_hooks')
 const { Vec3 } = require('vec3')
 const { safeName, writeJsonSafe, flushJsonWrites, cleanupStaleJsonTemps, copyRuntimeData, restoreRuntimeData } = require('../runtime-storage')
 const { TaskController } = require('../task-controller')
@@ -195,6 +196,12 @@ const hudIntervalMs = Number(process.env.HUD_INTERVAL_MS || 2000)
 const priorityIntervalMs = Number(process.env.PRIORITY_INTERVAL_MS || 1400)
 const worldScanIntervalMs = Number(process.env.WORLD_SCAN_INTERVAL_MS || 30000)
 const brainPlannerIntervalMs = Number(process.env.BRAIN_PLANNER_INTERVAL_MS || 6000)
+const eventLoopDelay = monitorEventLoopDelay({ resolution: 20 })
+eventLoopDelay.enable()
+let previousCpuUsage = process.cpuUsage()
+let previousCpuSampleAt = Date.now()
+let lastPlannerLogAt = 0
+let lastPlannerLogKey = ''
 const viewerDistance = Number(process.env.VIEWER_DISTANCE || 2)
 const viewerPort = Number(process.env.VIEWER_PORT || 3001)
 const hudUrl = `HUD port ${hudPort}`
@@ -479,9 +486,26 @@ function serverMessageFromJson(jsonMsg) {
 }
 
 function addRuntimeInterval(callback, delay) {
-  const timer = setInterval(callback, delay)
-  runtimeIntervals.push(timer)
-  return timer
+  let running = false
+  const run = async () => {
+    if (running) return
+    running = true
+    try { await callback() } catch (error) { logActionError('Runtime interval failed', error) }
+    finally { running = false }
+  }
+  const botKey = String(process.env.BOT_ID || process.env.MC_USERNAME || 'bot')
+  let hash = 0
+  for (const char of botKey) hash = (hash * 31 + char.charCodeAt(0)) >>> 0
+  const initialDelay = delay + (hash % Math.min(1200, Math.max(1, Math.floor(delay / 2))))
+  const initialTimer = setTimeout(() => {
+    const intervalTimer = setInterval(run, delay)
+    const trackedIndex = runtimeIntervals.indexOf(initialTimer)
+    if (trackedIndex >= 0) runtimeIntervals[trackedIndex] = intervalTimer
+    else clearInterval(intervalTimer)
+    run()
+  }, initialDelay)
+  runtimeIntervals.push(initialTimer)
+  return initialTimer
 }
 
 function clearRuntimeIntervals() {
@@ -1598,11 +1622,13 @@ async function mineVisibleBlock(block, label = 'mining', itemName = null) {
   }
   if (actionVersion !== state.stopVersion || state.hardStopped) return false
   await bot.lookAt(block.position.offset(0.5, 0.5, 0.5), true)
-  if (block.position.distanceTo(bot.entity.position) > 5 || !bot.canSeeBlock(block)) {
+  const visibleBlock = bot.blockAt(block.position)
+  if (!visibleBlock || visibleBlock.name !== block.name || visibleBlock.boundingBox === 'empty' ||
+    block.position.distanceTo(bot.entity.position) > 5 || !bot.canSeeBlock(visibleBlock)) {
     return false
   }
   try {
-    await bot.tool.equipForBlock(block, { requireHarvest: true })
+    await bot.tool.equipForBlock(visibleBlock, { requireHarvest: true })
     await preferDurableEquippedTool()
     if (shouldPreserveHeldTool()) {
       const durability = durabilityInfo(bot.heldItem)
@@ -1610,11 +1636,13 @@ async function mineVisibleBlock(block, label = 'mining', itemName = null) {
       recordLearning('mining', 'tools', bot.heldItem.name, 1, 'preserved for repair before breaking')
       return false
     }
-    rememberBlockTool(block, bot.heldItem)
-    await bot.dig(block, 'raycast', 'raycast')
-    bumpKnowledgeStat('mining', 'blocksMined', block.name)
-    recordLearning('mining', 'blocks', block.name, 3, `mined during ${label}`)
-    rememberOreMined(block, itemName)
+    const currentBlock = bot.blockAt(block.position)
+    if (!currentBlock || currentBlock.name !== block.name || currentBlock.boundingBox === 'empty') return false
+    rememberBlockTool(currentBlock, bot.heldItem)
+    await bot.dig(currentBlock, 'raycast', 'raycast')
+    bumpKnowledgeStat('mining', 'blocksMined', currentBlock.name)
+    recordLearning('mining', 'blocks', currentBlock.name, 3, `mined during ${label}`)
+    rememberOreMined(currentBlock, itemName)
     return true
   } catch (err) {
     bumpKnowledgeStat('mining', 'failedMines', block.name)
@@ -1633,24 +1661,27 @@ async function digNearbyVisibleBlock(block, label = 'clearing block') {
   if (state.activeDig) return false
   if (block.position.distanceTo(bot.entity.position) > 5) return false
   await bot.lookAt(block.position.offset(0.5, 0.5, 0.5), true)
-  if (!bot.canSeeBlock(block)) {
+  const visibleBlock = bot.blockAt(block.position)
+  if (!visibleBlock || visibleBlock.name !== block.name || visibleBlock.boundingBox === 'empty' || !bot.canSeeBlock(visibleBlock)) {
     return false
   }
   try {
-    const forcedTool = recoveryToolForBlock(block)
-    if (blockNeedsPickaxe(block) && !forcedTool) {
-      setCurrentTask('waiting', `cannot clear ${block.name} without a pickaxe`, { position: blockPositionText(block) })
+    const forcedTool = recoveryToolForBlock(visibleBlock)
+    if (blockNeedsPickaxe(visibleBlock) && !forcedTool) {
+      setCurrentTask('waiting', `cannot clear ${visibleBlock.name} without a pickaxe`, { position: blockPositionText(visibleBlock) })
       return false
     }
     if (forcedTool) await bot.equip(forcedTool, 'hand')
-    await bot.tool.equipForBlock(block, { requireHarvest: true })
-    if (blockNeedsPickaxe(block) && toolParts(bot.heldItem?.name)?.family !== 'pickaxe') return false
-    rememberBlockTool(block, bot.heldItem)
+    await bot.tool.equipForBlock(visibleBlock, { requireHarvest: true })
+    if (blockNeedsPickaxe(visibleBlock) && toolParts(bot.heldItem?.name)?.family !== 'pickaxe') return false
+    const currentBlock = bot.blockAt(block.position)
+    if (!currentBlock || currentBlock.name !== block.name || currentBlock.boundingBox === 'empty' || !bot.canSeeBlock(currentBlock)) return false
+    rememberBlockTool(currentBlock, bot.heldItem)
     try { bot.pathfinder.setGoal(null) } catch {}
-    const digKey = blockPositionText(block)
+    const digKey = blockPositionText(currentBlock)
     state.activeDig = { key: digKey, startedAt: Date.now(), label }
     let timeoutHandle = null
-    const digPromise = bot.dig(block, 'raycast', 'raycast')
+    const digPromise = bot.dig(currentBlock, 'raycast', 'raycast')
     try {
       await Promise.race([
         digPromise,
@@ -5233,7 +5264,21 @@ async function runSmartMiningStep() {
   if (item) await gatherItemStep(task)
 }
 
-async function scanWorldFeatures() {
+let worldFeatureScanAt = 0
+let worldFeatureScanPromise = null
+
+async function scanWorldFeatures({ force = false } = {}) {
+  if (!bot.entity) return
+  if (worldFeatureScanPromise) return worldFeatureScanPromise
+  const now = Date.now()
+  if (!force && now - worldFeatureScanAt < Math.min(worldScanIntervalMs, 10000)) return
+  worldFeatureScanAt = now
+  worldFeatureScanPromise = performWorldFeatureScan()
+  try { return await worldFeatureScanPromise }
+  finally { worldFeatureScanPromise = null }
+}
+
+async function performWorldFeatureScan() {
   if (!bot.entity) return
   const scannerResult = await worldScanner.tick()
   let changed = Boolean(scannerResult?.changed) || validateWorldMemoryNearby()
@@ -7192,7 +7237,7 @@ async function runPriorities() {
     if (!state.manualControlOnly) {
       if (Date.now() - state.lastWorldScanAt > worldScanIntervalMs) {
         state.lastWorldScanAt = Date.now()
-        await scanWorldFeatures()
+        await scanWorldFeatures({ force: true })
         if (cancelled()) return
       }
       if (await mineNearbyEliteUpgradeResource()) return
@@ -7359,7 +7404,12 @@ async function runPlannerBrainTick() {
   const plan = plannerBrain.choose(situation)
   if (!plan?.action) return false
 
-  console.log(`[Planner] ${plan.goal}/${plan.action}/${plan.reason} | score=${Math.round(plan.score ?? plan.priority ?? 0)} reward=${Math.round(plan.reward ?? 0)} risk=${Math.round(plan.risk ?? 0)} time=${Math.round(plan.timeCost ?? 0)}`)
+  const plannerLogKey = `${plan.goal}/${plan.action}/${plan.reason}`
+  if (plannerLogKey !== lastPlannerLogKey || Date.now() - lastPlannerLogAt >= 60000) {
+    console.log(`[Planner] ${plannerLogKey} | score=${Math.round(plan.score ?? plan.priority ?? 0)} reward=${Math.round(plan.reward ?? 0)} risk=${Math.round(plan.risk ?? 0)} time=${Math.round(plan.timeCost ?? 0)}`)
+    lastPlannerLogKey = plannerLogKey
+    lastPlannerLogAt = Date.now()
+  }
   const skillPlans = {
     heal_or_retreat: ['ensureSafety'], eat: ['eat'], get_food: ['findFood', 'eat'],
     get_wood: ['collectWood'], craft_crafting_table: ['craftPlanks', 'craftCraftingTable'],
@@ -8448,7 +8498,22 @@ bot.on('physicsTick', () => {
 })
 
 function updateHud() {
+  const now = Date.now()
+  const elapsedMs = Math.max(1, now - previousCpuSampleAt)
+  const cpuDelta = process.cpuUsage(previousCpuUsage)
+  previousCpuUsage = process.cpuUsage()
+  previousCpuSampleAt = now
+  const cpuPercent = ((cpuDelta.user + cpuDelta.system) / 1000 / elapsedMs) * 100
+  const runtimeHealth = {
+    cpuPercent: Number(cpuPercent.toFixed(1)),
+    rssMb: Number((process.memoryUsage().rss / 1048576).toFixed(1)),
+    eventLoopLagP95Ms: Number((eventLoopDelay.percentile(95) / 1e6).toFixed(1)),
+    eventLoopLagMaxMs: Number((eventLoopDelay.max / 1e6).toFixed(1)),
+    uptimeSeconds: Math.floor(process.uptime())
+  }
+  eventLoopDelay.reset()
   io.emit('update', {
+    runtimeHealth,
     botUsername: bot.username || null,
     connected: minecraftConnected,
     health: bot.health,

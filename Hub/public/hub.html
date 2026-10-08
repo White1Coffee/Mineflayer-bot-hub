@@ -1,8 +1,9 @@
 ﻿<!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('bot-hub-theme')||'dark'}catch{}</script>
   <link rel="icon" type="image/png" href="/favicon.png">
   <meta name="theme-color" content="#070b12">
   <meta name="mobile-web-app-capable" content="yes">
@@ -44,7 +45,11 @@
           <span id="botsTopStatus" class="status-chip">0 bots online</span>
         </div>
       </header>
-
+      <nav class="site-switcher" aria-label="Project sites">
+        <a class="site-link" data-state="online" href="/" aria-current="page"><span class="site-mark">Hub</span><span class="site-copy"><strong>Bot Hub</strong><small>Multi-bot control</small></span><span class="site-state">This site</span></a>
+        <a class="site-link" data-state="checking" href="#" data-linked-site="server"><span class="site-mark">MC</span><span class="site-copy"><strong>Minecraft Server</strong><small>Server manager</small></span><span class="site-state">Checking</span></a>
+        <a id="lastBotSiteLink" class="site-link" data-state="checking" href="#"><span class="site-mark">AI</span><span class="site-copy"><strong>Last bot</strong><small>Last bot dashboard visited</small></span><span class="site-state">Checking</span></a>
+      </nav>
       <section id="overview" class="tab active">
         <div id="dashboardConnection" class="notice">Dashboard realtime stream connecting…</div>
         <div id="dashboardMetrics" class="dashboard-metrics"></div>
@@ -90,6 +95,7 @@
       <section id="logisticsDashboard" class="tab"><div class="manage-block stack reconnect-panel"><div class="card-head"><div><h2>Reconnects</h2><p>Reconnectpogingen per bot en Minecraft-server over de laatste zeven dagen.</p></div></div><div class="reconnect-grid"><div><h2>Per bot</h2><div id="reconnectBotCharts"></div></div><div><h2>Per server</h2><div id="reconnectServerCharts"></div></div></div></div><div id="logisticsWarnings"></div><div class="manage-grid"><div class="manage-block stack"><h2>Bot inventories</h2><div id="botInventories"></div></div><div class="manage-block stack"><h2>Verified containers</h2><div id="containerInventory"></div></div><div class="manage-block stack"><h2>Reservations</h2><div id="inventoryReservations"></div></div></div></section>
       <section id="eventsDashboard" class="tab"><div class="toolbar"><select id="eventLevelFilter"><option value="">All levels</option><option>debug</option><option>info</option><option>success</option><option>warning</option><option>error</option><option>critical</option></select><input id="eventBotFilter" placeholder="Bot ID"><input id="eventGoalFilter" placeholder="Goal ID"><input id="eventTaskFilter" placeholder="Task ID"><input id="eventErrorFilter" placeholder="Error code"><select id="eventTimeFilter"><option value="">All buffered</option><option value="3600000">Last hour</option><option value="86400000">Last 24 hours</option></select></div><div id="dashboardEventFeed" class="event-feed"></div></section>
       <section id="dashboardSettings" class="tab"><div class="manage-grid">
+        <div class="manage-block stack"><h2>Appearance</h2><p>Choose light or dark colors for this dashboard. Your choice is saved in this browser.</p><label>Color mode<select id="siteTheme"><option value="light">Light</option><option value="dark">Dark</option></select></label></div>
         <form id="dashboardSettingsForm" class="manage-block stack"><h2>Dashboard configuration</h2><p>Application version: <strong id="dashboardAppVersion">-</strong>. Realtime bepaalt live updates; debug toont extra technische gegevens.</p><label>Enabled<select id="dashboardEnabled"><option value="true">Enabled</option><option value="false">Disabled</option></select></label><label>Realtime<select id="dashboardRealtime"><option value="true">Enabled</option><option value="false">Disabled</option></select></label><label>Debug mode<select id="dashboardDebug"><option value="false">Disabled</option><option value="true">Enabled</option></select></label><label>Control actions<select id="dashboardControls"><option value="true">Enabled</option><option value="false">Disabled</option></select></label><button type="submit">Save dashboard settings</button><p>Besturing buiten localhost vereist DASHBOARD_TOKEN.</p></form>
         <form id="dashboardTokenForm" class="manage-block stack"><h2>Telefoonbesturing</h2><p>Voor iOS en Android: vul dezelfde DASHBOARD_TOKEN in die op de Hub-computer is ingesteld. De waarde blijft alleen in dit browsertabblad en wordt bij sluiten verwijderd.</p><label>Dashboard token<input id="dashboardToken" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="Niet opgeslagen in instellingen"></label><button type="submit">Authorize this tab</button><button id="clearDashboardToken" type="button" class="secondary">Forget token</button><span id="dashboardTokenStatus" class="broadcast-status"></span></form>
         <form id="discordTokenForm" class="manage-block stack"><h2>Discord koppelen</h2><p>Plak de bot token uit het Discord Developer Portal. De token wordt alleen lokaal in een Git-genegeerd `.env`-bestand opgeslagen en nooit opnieuw getoond.</p><div id="discordTokenState" class="notice">Status wordt geladen…</div><label>Discord bot key<input id="discordBotToken" type="password" autocomplete="new-password" placeholder="Token wordt na opslaan leeggemaakt"></label><button type="submit">Save and connect Discord</button><button id="removeDiscordToken" type="button" class="danger">Remove Discord link</button><span id="discordTokenStatus" class="broadcast-status"></span></form>
@@ -222,6 +228,7 @@
     </main>
   </div>
   <script src="/hub.js" defer></script>
+  <script src="/hub-links.js?v=2" defer></script>
 </body>
 </html>
 

@@ -42,16 +42,22 @@ class WorldScanner {
     if (!this.bot?.entity || !this.bot.findBlocks) return { changed: false, seen: 0 }
     this.ensureShape()
     let changed = false
-    const seen = {
-      ores: this.scanBlocks(ORE_BLOCKS, 32, 48),
-      dangers: this.scanBlocks(DANGER_BLOCKS, 24, 24),
-      stations: this.scanBlocks(STATION_BLOCKS, 24, 24),
-      storage: this.scanBlocks(STORAGE_BLOCKS, 24, 16),
-      beds: this.scanBlocks(BED_BLOCKS, 32, 16),
-      farms: this.scanBlocks(FARM_BLOCKS, 32, 24),
-      villages: this.scanBlocks(VILLAGE_BLOCKS, 40, 32),
-      mines: this.scanBlocks(MINE_BLOCKS, 32, 24),
-      portals: this.scanBlocks(PORTAL_BLOCKS, 32, 12)
+    const scans = [
+      ['ores', ORE_BLOCKS, 32, 48], ['dangers', DANGER_BLOCKS, 24, 24],
+      ['stations', STATION_BLOCKS, 24, 24], ['storage', STORAGE_BLOCKS, 24, 16],
+      ['beds', BED_BLOCKS, 32, 16], ['farms', FARM_BLOCKS, 32, 24],
+      ['villages', VILLAGE_BLOCKS, 40, 32], ['mines', MINE_BLOCKS, 32, 24],
+      ['portals', PORTAL_BLOCKS, 32, 12]
+    ]
+    const seen = {}
+    for (let index = 0; index < scans.length; index++) {
+      const [key, blocks, distance, count] = scans[index]
+      seen[key] = this.scanBlocks(blocks, distance, count)
+      // findBlocks is synchronous; yield regularly so packet and heartbeat work can run between batches.
+      if (index % 3 === 2 && index < scans.length - 1) {
+        await new Promise(resolve => setImmediate(resolve))
+        if (!this.bot?.entity) return { changed: false, seen: 0 }
+      }
     }
 
     for (const block of seen.ores) changed = this.remember('ores', block.position, { block: block.name, source: 'world_scanner' }, 12) || changed

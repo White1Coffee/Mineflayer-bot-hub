@@ -541,15 +541,60 @@ async function state() {
 
 function html() {
   return `<!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>try{document.documentElement.dataset.theme=localStorage.getItem('minecraft-server-theme')||'dark'}catch{}</script>
   <link rel="icon" type="image/png" href="/favicon.png">
   <title>Minecraft Server Manager</title>
   <style>
     :root{color-scheme:dark;--bg:#070b12;--panel:#101923;--line:#294055;--text:#f4f8ff;--muted:#9fb0c2;--green:#55d6a5;--blue:#2f7db8;--red:#e26b7f;--yellow:#f1c75b;font-family:Inter,ui-sans-serif,system-ui,Segoe UI,sans-serif}
     *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text)}button,input,select,textarea{font:inherit}.shell{min-height:100vh;display:grid;grid-template-columns:220px minmax(0,1fr)}aside{position:sticky;top:0;height:100vh;border-right:1px solid var(--line);background:#0a1018;padding:20px 14px}.brand{margin-bottom:24px}.brand small,.eyebrow{display:block;color:var(--green);font-size:.72rem;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.brand strong{display:block;margin-top:5px;font-size:1.1rem}nav{display:grid;gap:6px}nav button{text-align:left;background:transparent;border:1px solid transparent;color:var(--muted)}nav button.active,nav button:hover{background:#142231;border-color:var(--line);color:white}main{width:100%;max-width:1500px;margin:0 auto;padding:24px}header{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:18px}.top-status{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:8px}.copy-pill{min-height:34px;border:1px solid var(--line);border-radius:999px;background:#08121c;color:#bfe7ff;padding:6px 12px}h1{margin:4px 0 0;font-size:2rem}h2{margin:0 0 10px;font-size:1.05rem}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));gap:12px}.wide{grid-column:1/-1}.card{border:1px solid var(--line);border-radius:8px;background:var(--panel);padding:14px}.toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}.chat-form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}.player-layout{display:grid;grid-template-columns:minmax(330px,.38fr) minmax(0,1fr);gap:12px;align-items:start}.player-list{display:grid;gap:8px;max-height:72vh;overflow:auto}.player-card{display:grid;grid-template-columns:48px minmax(0,1fr) 38px;align-items:center;gap:12px;border:1px solid var(--line);border-radius:8px;background:#101923;padding:10px;text-align:left}.player-card img{width:48px;height:48px;image-rendering:pixelated;border-radius:3px}.player-card .arrow{display:grid;place-items:center;width:32px;height:32px;border-radius:50%;background:#9aa3aa;color:white;font-size:1.4rem}.player-card.active{border-color:var(--green)}.player-name{font-size:1rem;font-weight:900}.status-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#a9b0b6;margin-left:6px}.status-dot.online{background:var(--green)}.detail-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}.detail-head img{width:58px;height:58px;image-rendering:pixelated;border-radius:4px}.detail-actions{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px}.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}.info-box{border:1px solid var(--line);border-radius:7px;background:#08121c;padding:10px}.info-box strong{display:block;margin-bottom:4px}.equipment-row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;margin-bottom:12px}.equipment-slot{display:grid;gap:5px;justify-items:center;color:var(--muted);font-size:.72rem;font-weight:900;text-transform:uppercase}.inventory-wrap{overflow:auto;border:1px solid var(--line);border-radius:8px;background:#303942;padding:12px}.mc-inventory{display:grid;grid-template-columns:repeat(9,44px);gap:3px;width:max-content}.slot{position:relative;width:44px;height:44px;background:#8b8b8b;border-top:3px solid #dadada;border-left:3px solid #dadada;border-right:3px solid #585858;border-bottom:3px solid #585858}.slot img{width:32px;height:32px;margin:3px;image-rendering:pixelated}.slot .empty-icon{width:32px;height:32px;margin:3px;opacity:.18;image-rendering:pixelated}.slot .count{position:absolute;right:3px;bottom:0;color:white;font-weight:900;text-shadow:2px 2px #333}.slot .del{position:absolute;top:1px;right:1px;width:17px;height:17px;min-height:0;padding:0;border-radius:3px;background:#8e3042;display:none;line-height:1}.slot:hover .del{display:block}.inv-note{margin-top:8px;color:var(--muted);font-size:.85rem}button{min-height:38px;border:1px solid transparent;border-radius:6px;background:var(--blue);color:white;font-weight:900;padding:8px 12px;cursor:pointer}button.secondary{background:#172838;border-color:var(--line)}button.danger{background:#8e3042}input,select,textarea{width:100%;min-width:0;border:1px solid var(--line);border-radius:6px;background:#08121c;color:var(--text);padding:9px 10px}.pill{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);border-radius:999px;padding:6px 10px;color:var(--muted);font-weight:900}.pill.online{color:var(--green);border-color:#29614d}.item{display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--line);padding:9px 0;color:var(--muted)}.item:first-child{border-top:0}.item strong{color:var(--text)}label{display:grid;gap:5px;color:var(--muted);font-size:.75rem;font-weight:900;text-transform:uppercase}.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.console{min-height:300px;max-height:58vh;overflow:auto;white-space:pre-wrap;background:#050a10;border:1px solid var(--line);border-radius:8px;padding:12px;color:#c9e3d8;font: .8rem Consolas,monospace}.hidden{display:none}.list{display:grid;gap:8px}@media(max-width:1000px){.player-layout{grid-template-columns:1fr}}@media(max-width:850px){.shell{grid-template-columns:1fr}aside{position:relative;height:auto}nav{grid-template-columns:1fr 1fr}main{padding:14px}}
+  </style>
+  <style>
+    .site-switcher{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:-4px 0 18px}
+    .site-link{display:flex;align-items:center;gap:11px;min-width:0;padding:10px 13px;border:1px solid var(--line);border-radius:11px;background:#101923;color:var(--text);text-decoration:none;box-shadow:0 8px 22px rgba(0,0,0,.16);transition:transform .15s ease,border-color .15s ease}
+    .site-link:hover{transform:translateY(-2px);border-color:var(--green)}
+    .site-mark{display:grid;place-items:center;flex:0 0 36px;height:36px;border-radius:10px;background:var(--green);color:#07130d;font-size:.74rem;font-weight:950}
+    .site-link[data-linked-site="bot"] .site-mark{background:#c3d978;color:#202b15}
+    .site-link[data-linked-site="hub"] .site-mark{background:var(--blue);color:white}
+    .site-copy{display:grid;min-width:0;gap:3px}.site-copy strong{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.87rem}.site-copy small{color:var(--muted);font-size:.72rem}
+    .site-state{display:flex;align-items:center;gap:6px;flex:0 0 auto;margin-left:auto;color:var(--muted);font-size:.7rem;font-weight:900}
+    .site-state:before{content:"";width:8px;height:8px;border-radius:50%;background:#77838e}
+    .site-link[data-state="online"] .site-state{color:var(--green)}.site-link[data-state="online"] .site-state:before{background:var(--green)}
+    .site-link[data-state="offline"] .site-state{color:var(--yellow)}.site-link[data-state="offline"] .site-state:before{background:var(--yellow)}
+    @media(max-width:850px){.site-switcher{grid-template-columns:1fr;gap:7px}}
+    :root{color-scheme:light;--bg:#edf1e8;--panel:#fffdf7;--line:#d6dfd2;--text:#1d2a20;--muted:#647267;--green:#348451;--blue:#3e788d;--red:#b43e48;--yellow:#a96a10}
+    body{background:linear-gradient(145deg,#f5f5ed 0,#e9efe5 48%,#f2f1e9 100%)}
+    aside{background:#1e3025;border-color:#344a39;box-shadow:8px 0 28px rgba(25,43,30,.08)}
+    aside .brand strong{color:#f5f7ef}aside .brand small{color:#aabca9}aside nav button{color:#c1d0c0}
+    aside nav button.active,aside nav button:hover{background:#304938;border-color:#54745a;color:#fffdf7}
+    .eyebrow{color:#348451}h1{letter-spacing:-.035em}
+    .card,.player-card,.info-box{background:#fffdf7;border-color:#d6dfd2;box-shadow:0 10px 28px rgba(35,55,39,.07)}
+    .player-card{color:var(--text)}.player-card .arrow{background:#e8f0e3;color:#314c36}
+    button{background:#348451;box-shadow:0 3px 8px rgba(37,103,63,.14)}button.secondary{background:#edf3e9;border-color:#d0ddce;color:#314c36}button.danger{background:#b43e48}
+    input,select,textarea{background:#fff;border-color:#cbd7ca;color:#1d2a20}
+    .pill{background:#eef4e9;border-color:#d5e1d0;color:#4c6250}.copy-pill{background:#f7f8f2;color:#326f82}
+    .site-link{background:#fffdf7;border-color:#d6dfd2}
+    .inventory-wrap{background:#dce2d9;border-color:#c9d2c5}
+    .console{background:#17221b;border-color:#344a39;color:#d5e6d6}
+    :root[data-theme="dark"]{color-scheme:dark;--bg:#070b12;--panel:#101923;--line:#294055;--text:#f4f8ff;--muted:#aebed0;--green:#55d6a5;--blue:#62b8e8;--red:#e26b7f;--yellow:#f1c75b}
+    :root[data-theme="dark"] body{background:var(--bg);color:var(--text)}
+    :root[data-theme="dark"] aside{background:#0a1018;border-color:var(--line);box-shadow:none}
+    :root[data-theme="dark"] aside nav button{color:#b7c6d8;background:transparent;border-color:transparent}
+    :root[data-theme="dark"] aside nav button:hover,:root[data-theme="dark"] aside nav button:focus-visible{background:#101d2e;border-color:#294055;color:#fff;outline:none}
+    :root[data-theme="dark"] aside nav button.active{background:#142231;border-color:#38516d;color:#fff;box-shadow:inset 3px 0 var(--green)}
+    :root[data-theme="dark"] .card,:root[data-theme="dark"] .player-card,:root[data-theme="dark"] .info-box,:root[data-theme="dark"] .site-link{background:var(--panel);border-color:var(--line);color:var(--text);box-shadow:none}
+    :root[data-theme="dark"] .player-card .arrow{background:#172838;color:#dceaf5}
+    :root[data-theme="dark"] button{background:var(--blue);color:white;box-shadow:none}
+    :root[data-theme="dark"] button.secondary{background:#172838;border-color:var(--line);color:#dceaf5}
+    :root[data-theme="dark"] input,:root[data-theme="dark"] select,:root[data-theme="dark"] textarea{background:#08121c;border-color:var(--line);color:var(--text)}
+    :root[data-theme="dark"] .pill,:root[data-theme="dark"] .copy-pill{background:#0d1a2c;border-color:var(--line);color:var(--muted)}
+    :root[data-theme="dark"] .inventory-wrap{background:#303942;border-color:var(--line)}
+    :root[data-theme="dark"] .console{background:#050a10;border-color:var(--line);color:#c9e3d8}
+    .appearance-card{max-width:560px;padding:18px}
+    .appearance-card p{color:var(--muted);line-height:1.5}
   </style>
 </head>
 <body>
@@ -565,10 +610,16 @@ function html() {
       <button type="button" data-tab="players">Players</button>
       <button type="button" data-tab="files">Files</button>
       <button type="button" data-tab="logs">Logs</button>
+      <button type="button" data-tab="appearance">Appearance</button>
     </nav>
   </aside>
   <main>
     <header><div><span class="eyebrow">Minecraft server control</span><h1 id="title">Overview</h1></div><div class="top-status"><button type="button" id="copyAddress" class="copy-pill" title="Copy server IP"><span id="serverAddress">Loading IP</span></button><span id="status" class="pill">Loading</span></div></header>
+    <nav class="site-switcher" aria-label="Project sites">
+      <a class="site-link" data-state="online" href="/" aria-current="page"><span class="site-mark">MC</span><span class="site-copy"><strong>Minecraft Server</strong><small>Server manager</small></span><span class="site-state">This site</span></a>
+      <a class="site-link" data-state="checking" href="#" data-linked-site="hub"><span class="site-mark">Hub</span><span class="site-copy"><strong>Bot Hub</strong><small>Multi-bot control</small></span><span class="site-state">Checking</span></a>
+      <a id="lastBotSiteLink" class="site-link" data-state="checking" href="#"><span class="site-mark">AI</span><span class="site-copy"><strong>Last bot</strong><small>Last bot dashboard visited</small></span><span class="site-state">Checking</span></a>
+    </nav>
     <div class="toolbar"><button id="start">Start server</button><button id="stop" class="secondary">Stop server</button><button id="refresh" class="secondary">Refresh</button></div>
     <section id="overview" class="tab grid"></section>
     <section id="chat" class="tab hidden grid"><div class="card wide"><h2>Server chat</h2><div id="chatLog" class="console"></div><form id="chatForm" class="chat-form" style="margin-top:10px"><input id="chatInput" placeholder="Type as server, for example: Hello players"><button type="submit">Say</button></form></div></section>
@@ -578,11 +629,13 @@ function html() {
     <section id="players" class="tab hidden player-layout"><div class="card"><h2>Players</h2><div id="playerList" class="player-list"></div></div><div id="playerDetails" class="card"><h2>Player details</h2><p style="color:var(--muted)">Select a player.</p></div></section>
     <section id="files" class="tab hidden grid"></section>
     <section id="logs" class="tab hidden grid"><div class="card wide"><h2>Server output</h2><div id="outLog" class="console"></div></div><div class="card wide"><h2>Server errors</h2><div id="errLog" class="console"></div></div></section>
+    <section id="appearance" class="tab hidden"><div class="card appearance-card"><h2>Appearance</h2><p>Choose light or dark colors for this dashboard. Your choice is saved in this browser.</p><label>Color mode<select id="siteTheme"><option value="light">Light</option><option value="dark">Dark</option></select></label></div></section>
   </main>
 </div>
 <script>
 let data=null
 let selectedPlayer=''
+;(function linkProjectSites(){const host=window.location.hostname||'localhost',protocol=window.location.protocol,sites={hub:protocol+'//'+host+':3100/'},botPages={'3110':'bot1','3112':'WC_Tester','3114':'bot2','3116':'official-bot','3118':'default-bot'};function lastPort(){const item=document.cookie.split(';').map(value=>value.trim()).find(value=>value.indexOf('yunalinkLastBot=')===0),port=item?item.slice('yunalinkLastBot='.length):'';return botPages[port]?port:'3118'}async function check(link,url){const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),2500);try{link.href=url;await fetch(url,{mode:'no-cors',cache:'no-store',signal:controller.signal});link.dataset.state='online';link.querySelector('.site-state').textContent='Online'}catch{link.dataset.state='offline';link.querySelector('.site-state').textContent='Offline'}finally{clearTimeout(timeout)}}function refresh(){document.querySelectorAll('[data-linked-site]').forEach(link=>check(link,sites[link.dataset.linkedSite]));const port=lastPort(),link=document.getElementById('lastBotSiteLink');link.href=protocol+'//'+host+':'+port+'/';link.querySelector('.site-copy strong').textContent=botPages[port];check(link,link.href)}refresh();setInterval(refresh,10000)})()
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
 async function api(url, options={}){const r=await fetch(url,{headers:{'Content-Type':'application/json',...(options.headers||{})},...options});const j=await r.json().catch(()=>({}));if(!r.ok||j.ok===false)throw new Error(j.error||'Request failed');return j}
 function bytes(v){let n=Number(v||0),u=['B','KB','MB','GB'],i=0;while(n>1024&&i<u.length-1){n/=1024;i++}return n.toFixed(i?1:0)+' '+u[i]}
@@ -606,6 +659,7 @@ document.getElementById('consoleLog').textContent=(data.logs.out||[]).join('\\n'
 document.getElementById('outLog').textContent=(data.logs.out||[]).join('\\n')||'No output yet.';document.getElementById('errLog').textContent=(data.logs.err||[]).join('\\n')||'No errors.'}
 async function refresh(force=false){data=await api('/api/state');render(force)}
 document.querySelector('nav').onclick=e=>{const b=e.target.closest('button[data-tab]');if(!b)return;document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('hidden',x.id!==b.dataset.tab));document.getElementById('title').textContent=b.textContent}
+const siteTheme=document.getElementById('siteTheme');siteTheme.value=document.documentElement.dataset.theme||'dark';siteTheme.addEventListener('change',()=>{const mode=siteTheme.value==='dark'?'dark':'light';document.documentElement.setAttribute('data-theme',mode);try{localStorage.setItem('minecraft-server-theme',mode)}catch{}})
 document.getElementById('playerList').onclick=e=>{const b=e.target.closest('[data-player]');if(!b)return;showPlayer(b.dataset.player).catch(err=>alert(err.message))}
 document.getElementById('chatForm').onsubmit=async e=>{e.preventDefault();const input=document.getElementById('chatInput');const message=input.value.trim();if(!message)return;try{await api('/api/chat',{method:'POST',body:JSON.stringify({message})});input.value='';await refresh(false)}catch(err){alert(err.message)}}
 document.getElementById('commandForm').onsubmit=async e=>{e.preventDefault();const input=document.getElementById('commandInput');const command=input.value.trim();if(!command)return;try{await api('/api/command',{method:'POST',body:JSON.stringify({command})});input.value='';await refresh(false)}catch(err){alert(err.message)}}

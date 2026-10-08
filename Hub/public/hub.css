@@ -229,3 +229,59 @@
       .event strong,.event small { grid-column:1/-1; }
       .reconnect-chart { grid-template-columns:minmax(80px,120px) minmax(60px,1fr) auto; }
     }
+    .site-switcher { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin:0 0 18px; }
+    .site-link { display:flex; align-items:center; gap:11px; min-width:0; padding:10px 13px; border:1px solid var(--line); border-radius:10px; background:var(--panel); color:var(--text); text-decoration:none; box-shadow:0 7px 20px rgba(0,0,0,.12); transition:transform .15s ease,border-color .15s ease; }
+    .site-link:hover { transform:translateY(-2px); border-color:var(--blue); }
+    .site-mark { display:grid; place-items:center; flex:0 0 36px; height:36px; border-radius:10px; background:var(--blue); color:#fff; font-size:.75rem; font-weight:950; }
+    .site-link[data-linked-site="bot"] .site-mark { background:var(--green); color:#07130d; }
+    .site-link[data-linked-site="server"] .site-mark { background:var(--yellow); color:#211808; }
+    .site-copy { display:grid; min-width:0; gap:3px; }
+    .site-copy strong { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.88rem; }
+    .site-copy small { color:var(--muted); font-size:.72rem; }
+    .site-state { display:flex; align-items:center; gap:6px; flex:0 0 auto; margin-left:auto; color:var(--muted); font-size:.7rem; font-weight:900; }
+    .site-state::before { content:""; width:8px; height:8px; border-radius:50%; background:#77838e; }
+    .site-link[data-state="online"] .site-state { color:var(--green); }
+    .site-link[data-state="online"] .site-state::before { background:var(--green); }
+    .site-link[data-state="offline"] .site-state { color:var(--yellow); }
+    .site-link[data-state="offline"] .site-state::before { background:var(--yellow); }
+    @media (max-width:760px) { .site-switcher { grid-template-columns:1fr; gap:7px; } }
+    :root { color-scheme:light; --bg:#edf1e8; --panel:#fffdf7; --panel-strong:#e8f0e3; --line:#d6dfd2; --text:#1d2a20; --muted:#647267; --green:#348451; --blue:#3e788d; --yellow:#a96a10; --red:#b43e48; }
+    body { background:linear-gradient(145deg,#f5f5ed 0,#e9efe5 48%,#f2f1e9 100%); }
+    aside { background:#1e3025; border-color:#344a39; box-shadow:8px 0 28px rgba(25,43,30,.08); }
+    aside .brand strong { color:#f5f7ef; }
+    aside .brand small { color:#aabca9; }
+    aside nav button { color:#c1d0c0; }
+    aside nav button.active,aside nav button:hover { background:#304938; border-color:#54745a; color:#fffdf7; }
+    h1 { letter-spacing:-.035em; }
+    .eyebrow { color:#348451; }
+    .bot-card,.merge-row,.notice,.overview-wrap,.broadcast,.manage-block,.manage-step,.merged-entry,.card,.site-link { box-shadow:0 10px 28px rgba(35,55,39,.07); }
+    .bot-card,.merge-row,.notice,.overview-wrap,.broadcast,.manage-block,.manage-step,.merged-entry { background:#fffdf7; border-color:#d6dfd2; }
+    button { background:#348451; }
+    button.secondary { background:#edf3e9; border-color:#d0ddce; color:#314c36; }
+    button.danger { background:#b43e48; color:white; }
+    input,select,textarea { background:#fff; border-color:#cbd7ca; color:#1d2a20; }
+    .pill { background:#eef4e9; border-color:#d5e1d0; color:#4c6250; }
+    .status-chip { background:#f7f8f2; }
+    .target-bot,.chat-targets label { background:#f4f7ef; border-color:#dbe4d7; color:#26382b; }
+    .site-link { background:#fffdf7; border-color:#d6dfd2; }
+    .site-mark { box-shadow:0 4px 10px rgba(30,60,40,.12); }
+    .schematic-builder-result,.info-box { background:#f5f7ef; border-color:#d6dfd2; }
+    .overview-wrap,.event-list,.table-wrap { background:#fffdf7; }
+    :root[data-theme="dark"] { color-scheme:dark; --bg:#070b12; --panel:#101923; --panel-strong:#142231; --line:#294055; --text:#f4f8ff; --muted:#aebed0; --green:#55d6a5; --blue:#62b8e8; --yellow:#f1c75b; --red:#e26b7f; }
+    :root[data-theme="dark"] body { background:#070b12; color:var(--text); }
+    :root[data-theme="dark"] aside { background:#0a1018; border-color:var(--line); box-shadow:none; }
+    :root[data-theme="dark"] aside .brand strong { color:var(--text); }
+    :root[data-theme="dark"] aside nav button { color:#b7c6d8; background:transparent; border:1px solid transparent; }
+    :root[data-theme="dark"] aside nav button:hover,:root[data-theme="dark"] aside nav button:focus-visible { color:#fff; background:#101d2e; border-color:#294055; outline:none; }
+    :root[data-theme="dark"] aside nav button.active { color:#fff; background:#142231; border-color:#38516d; box-shadow:inset 3px 0 var(--green); }
+    :root[data-theme="dark"] .bot-card,:root[data-theme="dark"] .merge-row,:root[data-theme="dark"] .notice,:root[data-theme="dark"] .overview-wrap,:root[data-theme="dark"] .broadcast,:root[data-theme="dark"] .manage-block,:root[data-theme="dark"] .manage-step,:root[data-theme="dark"] .merged-entry,:root[data-theme="dark"] .card,:root[data-theme="dark"] .site-link { background:var(--panel); border-color:var(--line); color:var(--text); box-shadow:none; }
+    :root[data-theme="dark"] button { background:#1e66a0; color:white; }
+    :root[data-theme="dark"] button.secondary { background:#172838; border-color:var(--line); color:#dceaf5; }
+    :root[data-theme="dark"] input,:root[data-theme="dark"] select,:root[data-theme="dark"] textarea { background:#08121c; border-color:var(--line); color:var(--text); }
+    :root[data-theme="dark"] .target-bot,:root[data-theme="dark"] .chat-targets label,:root[data-theme="dark"] .schematic-builder-result,:root[data-theme="dark"] .info-box,:root[data-theme="dark"] .detail-grid span,:root[data-theme="dark"] .task-card,:root[data-theme="dark"] .skill-bar { background:#0b151f; border-color:var(--line); color:var(--text); }
+    :root[data-theme="dark"] .console { background:#050a10; border-color:var(--line); color:#c9e3d8; }
+    :root[data-theme="dark"] .overview-wrap,:root[data-theme="dark"] .event-list,:root[data-theme="dark"] .table-wrap { background:var(--panel); }
+    :root[data-theme="dark"] .inventory-wrap { background:#303942; border-color:var(--line); }
+    :root[data-theme="dark"] .status-chip,:root[data-theme="dark"] .pill { background:#0d1a2c; border-color:var(--line); color:var(--muted); }
+    :root[data-theme="dark"] .schematic-builder-result,:root[data-theme="dark"] .info-box { background:#0b151f; border-color:var(--line); color:var(--text); }
+    :root[data-theme="dark"] .target-bot,:root[data-theme="dark"] .chat-targets label { background:#0b151f; border-color:var(--line); color:var(--text); }
